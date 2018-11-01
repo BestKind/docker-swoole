@@ -1,0 +1,39 @@
+version: "3"
+services:
+  mysql:
+    # 可以使用其他的镜像
+    image: mysql:5.7
+    environment:
+      # 一下配置可以根据情况自行修改
+      # root 用户的密码
+      MYSQL_ROOT_PASSWORD: "root"
+      # 要创建的数据库
+      MYSQL_DATABASE: "test"
+      # 用户
+      MYSQL_USER: "app"
+      # 密码
+      MYSQL_PASSWORD: "123456"
+    # 数据卷的映射关系，将数据卷保存在本地
+    volumes:
+      - ./services/mysql/data:/var/lib/mysql
+    # 端口映射
+    ports:
+      - "3306:3306"
+  php:
+    build: 
+      context: ./services/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./code:/www/html/app
+    ports:
+      - "9090:9000"
+  nginx:
+    image: nginx:1.12.2
+    ports:
+      - "8000:80"
+    depends_on:
+      - php
+    volumes:
+      - ./services/nginx/config:/etc/nginx/conf.d
+      - ./services/nginx/logs:/etc/nginx/logs
+      - ./code:/www/html/app
