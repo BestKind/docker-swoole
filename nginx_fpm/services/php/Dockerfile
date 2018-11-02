@@ -1,4 +1,4 @@
-FROM php:7.1-fpm
+FROM php:7.2-fpm
 MAINTAINER bestkind
 
 # 设置时区
@@ -17,6 +17,6 @@ RUN apt-get update && apt-get install -y \
         && docker-php-ext-install pdo_mysql \
         && docker-php-ext-install opcache \
         && docker-php-ext-install mysqli \
+        && pecl install xdebug && docker-php-ext-enable xdebug \
         && rm -r /var/lib/apt/lists/*
 
-COPY ./php.ini /usr/local/etc/php/conf.d/php.ini
