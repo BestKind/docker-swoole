@@ -14,4 +14,3 @@
 
 - [x] php7 + swoole
 - [x] php7 + nginx + php-fpm
-- [ ] go
