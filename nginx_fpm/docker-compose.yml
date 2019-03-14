@@ -19,6 +19,11 @@ services:
     # 端口映射
     ports:
       - "3306:3306"
+    networks:
+      app_net:
+      # 固定子网ip，网段必须在子网络10.10.*.*
+        ipv4_address: 10.10.10.1
+    container_name: "compose-mysql"
   php:
     build: 
       context: ./services/php
@@ -32,6 +37,9 @@ services:
       XDEBUG_CONFIG: "remote_host=${HOST_IP}"
     env_file:
       - '.env'
+    networks:
+      - app_net
+    container_name: "compose-php"
   nginx:
     image: nginx:1.15.2
     ports:
@@ -46,3 +54,15 @@ services:
       - ./code:/www/html/app
     env_file:
       - '.env'
+    networks:
+      - app_net
+      # 容器名称
+    container_name: "compose-nginx"
+networks:
+    # 配置docker network
+    app_net:
+        driver: bridge
+        ipam:
+            config:
+                # 子网络
+                - subnet: 10.10.0.0/16
