@@ -3,6 +3,8 @@ services:
   mysql:
     # 可以使用其他的镜像
     image: mysql:5.7
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       # 一下配置可以根据情况自行修改
       # root 用户的密码
@@ -16,9 +18,11 @@ services:
     # 数据卷的映射关系，将数据卷保存在本地
     volumes:
       - ./services/mysql/data:/var/lib/mysql
+      - ./services/mysql/config/my.conf:/etc/mysql/my.conf
+      - ./services/mysql/init:/docker-entrypoint-initdb.d/
     # 端口映射
     ports:
-      - "3306:3306"
+      - "6606:3306"
     networks:
       app_net:
       # 固定子网ip，网段必须在子网络10.10.*.*
@@ -30,15 +34,20 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./code:/www/html/app
+      - ./services/php/php.ini:/usr/local/etc/php/php.ini
       - ./services/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./services/php/my-fpm.conf:/usr/local/etc/php-fpm.d/my-fpm.conf
     ports:
       - "9000:9000"
+    links:
+      - mysql
     environment:
       XDEBUG_CONFIG: "remote_host=${HOST_IP}"
     env_file:
       - '.env'
     networks:
-      - app_net
+      app_net:
+        ipv4_address: 10.10.10.2
     container_name: "compose-php"
   nginx:
     image: nginx:1.15.2
@@ -50,14 +59,23 @@ services:
       - php
     volumes:
       - ./services/nginx/config:/etc/nginx/conf.d
-      - ./services/nginx/logs:/etc/nginx/logs
+      - ./services/nginx/logs:/var/log/nginx
       - ./code:/www/html/app
     env_file:
       - '.env'
     networks:
-      - app_net
-      # 容器名称
+      app_net:
+        ipv4_address: 10.10.10.3
+    # 容器名称
     container_name: "compose-nginx"
+  redid:
+      image: redis
+      ports:
+        - "6379:6379"
+      networks:
+        app_net:
+          ipv4_address: 10.10.10.4
+      container_name: "compose-redis"
 networks:
     # 配置docker network
     app_net:
