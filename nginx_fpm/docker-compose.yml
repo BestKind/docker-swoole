@@ -18,7 +18,7 @@ services:
     # 数据卷的映射关系，将数据卷保存在本地
     volumes:
       - ./services/mysql/data:/var/lib/mysql
-      - ./services/mysql/config/my.conf:/etc/mysql/my.conf
+      - ./services/mysql/config/my.cnf:/etc/mysql/my.cnf
       - ./services/mysql/init:/docker-entrypoint-initdb.d/
     # 端口映射
     ports:
