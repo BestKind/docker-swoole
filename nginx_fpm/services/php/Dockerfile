@@ -22,6 +22,8 @@ RUN apk update && apk add --no-cache --virtual .build-deps \
         freetype-dev \
         libjpeg-turbo-dev \
         libpng-dev \
+        icu \
+        icu-dev \
     && apk add --no-cache \
         curl \
         git \
@@ -51,6 +53,9 @@ RUN apk update && apk add --no-cache --virtual .build-deps \
     && docker-php-ext-install -j"$(getconf _NPROCESSORS_ONLN)" iconv \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install -j"$(getconf _NPROCESSORS_ONLN)" gd \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl \
+    && docker-php-ext-enable intl \
     && pecl install -o -f redis \
     # && pecl install xdebug \
     && rm -rf /tmp/pear \
