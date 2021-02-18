@@ -1,1 +1,5 @@
 .idea
+.DS_Store
+/lrmp/mysql/data
+/lrmp/nginx/.DS_Store
+/lrmp/nginx/logs

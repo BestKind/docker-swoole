@@ -1,0 +1,126 @@
+version: "3"
+services:
+  mysql-master:
+    image: mysql:latest
+    restart: always
+    env_file:
+      - ".env"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/data:/var/lib/mysql-files
+      - ./mysql/config/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/init:/docker-entrypoint-initdb.d/
+    ports:
+      - "6606:3306"
+    networks:
+      app_net:
+        ipv4_address: 10.10.3.1
+    container_name: "lnrp-mysql-master"
+  mysql-slave-1:
+    image: mysql:latest
+    restart: always
+    env_file:
+      - ".env"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/slave/data:/var/lib/mysql-files
+      - ./mysql/slave/config/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/slave/init:/docker-entrypoint-initdb.d
+    ports:
+      - "6607:3306"
+    depends_on:
+      - mysql-master
+    networks:
+      app_net:
+        ipv4_address: 10.10.3.2
+    container_name: "lnrp-mysql-slave-1"
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./www:/www/project
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/my-fpm.conf:/usr/local/etc/php-fpm.d/my-fpm.conf
+      # - ./php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    ports:
+      - "9000:9000"
+    links:
+      - mysql-master
+      - mysql-slave-1
+    env_file:
+      - ".env"
+    networks:
+      app_net:
+        ipv4_address: 10.10.10.2
+    container_name: "lnrp-php"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - php
+    links:
+      - php
+    volumes:
+      - ./nginx/config:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+      - ./www:/www/project
+    env_file:
+      - ".env"
+    networks:
+      app_net:
+        ipv4_address: 10.10.10.3
+    container_name: "lnrp-nginx"
+  redis-master:
+    image: redis:latest
+    working_dir: /usr/src/redis
+    sysctls:
+      - net.core.somaxconn=1024
+    volumes:
+      - ./redis/master/data:/usr/src/redis
+    command: redis-server
+    ports:
+      - "6379:6379"
+    networks:
+      app_net:
+        ipv4_address: 10.10.5.1
+    container_name: "lnrp-redis-master"
+  redis-slave-1:
+    image: redis:latest
+    working_dir: /usr/src/redis
+    sysctls:
+      - net.core.somaxconn=1024
+    depends_on:
+      - redis-master
+    volumes:
+      - ./redis/slave-1/data:/usr/src/redis
+    command: redis-server --slaveof redis-master 6379
+    ports:
+      - "7001:6379"
+    networks:
+      app_net:
+        ipv4_address: 10.10.5.2
+    container_name: "lnrp-redis-slave-1"
+  redis-slave-2:
+    image: redis:latest
+    working_dir: /usr/src/redis
+    sysctls:
+      - net.core.somaxconn=1024
+    depends_on:
+      - redis-master
+    volumes:
+      - ./redis/slave-2/data:/usr/src/redis
+    command: redis-server --slaveof redis-master 6379
+    ports:
+      - "7002:6379"
+    networks:
+      app_net:
+        ipv4_address: 10.10.5.3
+    container_name: "lnrp-redis-slave-2"
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+        config:
+          - subnet: 10.10.0.0/16
