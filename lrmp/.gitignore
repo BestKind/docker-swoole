@@ -1,0 +1,7 @@
+/mysql/master/data
+/mysql/slave/data
+/nginx/.DS_Store
+/nginx/logs
+/redis/master/data
+/redis/slave-1/data
+/redis/slave-1/data
