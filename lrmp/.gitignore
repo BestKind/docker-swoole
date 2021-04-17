@@ -2,6 +2,7 @@
 /mysql/slave/data
 /nginx/.DS_Store
 /nginx/logs
-/redis/master/data
-/redis/slave-1/data
-/redis/slave-1/data
+/nginx/config/
+/redis/master/data/dump.rdb
+/redis/slave-1/data/dump.rdb
+/redis/slave-2/data/dump.rdb
