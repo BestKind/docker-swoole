@@ -15,13 +15,12 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.3.1
-    container_name: "lnrp-mysql-master"
+    container_name: "lrmp-mysql-master"
   mysql-slave-1:
     image: mysql:latest
     restart: always
     env_file:
       - ".env"
-    # command: /bin/bash -c "cd /tmp && bash /tmp/test.sh"
     volumes:
       - ./mysql/slave/data/mysql:/var/lib/mysql
       - ./mysql/slave/data/mysql-files:/var/lib/mysql-files
@@ -35,7 +34,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.3.2
-    container_name: "lnrp-mysql-slave-1"
+    container_name: "lrmp-mysql-slave-1"
   php:
     build:
       context: ./php
@@ -55,7 +54,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.10.2
-    container_name: "lnrp-php"
+    container_name: "lrmp-php"
   nginx:
     image: nginx:latest
     ports:
@@ -73,7 +72,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.10.3
-    container_name: "lnrp-nginx"
+    container_name: "lrmp-nginx"
   redis-master:
     image: redis:latest
     working_dir: /usr/src/redis
@@ -87,7 +86,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.5.1
-    container_name: "lnrp-redis-master"
+    container_name: "lrmp-redis-master"
   redis-slave-1:
     image: redis:latest
     working_dir: /usr/src/redis
@@ -103,7 +102,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.5.2
-    container_name: "lnrp-redis-slave-1"
+    container_name: "lrmp-redis-slave-1"
   redis-slave-2:
     image: redis:latest
     working_dir: /usr/src/redis
@@ -119,7 +118,7 @@ services:
     networks:
       app_net:
         ipv4_address: 10.10.5.3
-    container_name: "lnrp-redis-slave-2"
+    container_name: "lrmp-redis-slave-2"
 networks:
   app_net:
     driver: bridge
